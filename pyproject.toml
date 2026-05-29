@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "business-kit"
+version = "0.1.0"
+description = "Spec-driven methodology for business development"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["business", "strategy", "gtm", "pitch", "bd", "cli", "ai"]
+dependencies = [
+    "click>=8.1",
+]
+
+[project.scripts]
+bk = "bk.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["bk*"]
+
+[tool.setuptools.package-data]
+bk = [
+    "templates/*.md",
+    "templates/brief/*.md",
+    "templates/execute/*.md",
+    "templates/commands/*.md",
+    "templates/modules-available/**/*.md",
+]
