@@ -6,6 +6,7 @@ created: {{ created }}
 ai_agent: [claude | gpt | gemini | other]
 language: en
 phase: brief
+integration: {{ integration }}
 
 active_modules: []
 framework_preset: none

@@ -45,6 +45,24 @@ MODULE_COMMANDS: dict[str, list[str]] = {
     "retrospective": ["/bk.retro"],
 }
 
+# Agent-native integration targets — where command files are mirrored
+INTEGRATIONS: dict[str, dict] = {
+    "claude":   {"dir": ".claude/commands",  "suffix": ".md"},
+    "copilot":  {"dir": ".github/prompts",   "suffix": ".prompt.md"},
+    "cursor":   {"dir": ".cursor/rules",     "suffix": ".md"},
+    "windsurf": {"dir": ".windsurf/rules",   "suffix": ".md"},
+}
+
+COMMAND_DESCRIPTIONS: dict[str, str] = {
+    "bk.brief":    "Generate brief.md via guided Q&A",
+    "bk.strategy": "Generate strategy.md from approved brief",
+    "bk.plan":     "Generate plan.md from approved strategy",
+    "bk.execute":  "Generate execution artifacts (pitch, proposal, email, etc.)",
+    "bk.review":   "Audit all artifacts for consistency and gaps",
+    "bk.status":   "Show current phase, approved items, and next action",
+    "bk.clarify":  "Fill gaps in brief with guided Q&A",
+}
+
 MODULE_DESCRIPTIONS: dict[str, str] = {
     "scrum":         "Sprint-structured plans, backlog, velocity tracking",
     "itil":          "Service level definitions and value chain checklist",
@@ -66,13 +84,48 @@ def _write_if_new(path: Path, content: str) -> bool:
     return True
 
 
-def _render_config(project_type: str, project_name: str) -> str:
+def _write_commands_for_integration(
+    commands_src_dir: Path,
+    root: Path,
+    integration: str,
+) -> list[str]:
+    """Mirror command files into the agent-native directory. Returns relative paths created."""
+    cfg = INTEGRATIONS[integration]
+    target = root / cfg["dir"]
+    target.mkdir(parents=True, exist_ok=True)
+    suffix = cfg["suffix"]
+    written: list[str] = []
+    for src in sorted(commands_src_dir.iterdir()):
+        stem = src.stem  # e.g. "bk.brief"
+        dst = target / f"{stem}{suffix}"
+        content = src.read_text("utf-8")
+        if integration == "copilot":
+            desc = COMMAND_DESCRIPTIONS.get(stem, stem.replace(".", " "))
+            content = f"---\nmode: 'agent'\ndescription: '{desc}'\n---\n\n{content}"
+        if _write_if_new(dst, content):
+            written.append(str(dst.relative_to(root)))
+    return written
+
+
+def _get_integration(config_path: Path) -> str | None:
+    """Return the stored integration name from config.md, or None."""
+    if not config_path.exists():
+        return None
+    for line in config_path.read_text("utf-8").splitlines():
+        if line.startswith("integration:"):
+            val = line.split(":", 1)[1].strip()
+            return val if val and val != "none" else None
+    return None
+
+
+def _render_config(project_type: str, project_name: str, integration: str = "none") -> str:
     template = (TEMPLATES_DIR / "config.md").read_text(encoding="utf-8")
     return (
         template
         .replace("{{ project_name }}", project_name)
         .replace("{{ project_type }}", project_type)
         .replace("{{ created }}", date.today().isoformat())
+        .replace("{{ integration }}", integration)
     )
 
 
@@ -132,7 +185,14 @@ def cli() -> None:
     default=None,
     help="Project name (defaults to current directory name).",
 )
-def init(project_type: str, project_name: str | None) -> None:
+@click.option(
+    "--integration",
+    "integration",
+    type=click.Choice(list(INTEGRATIONS.keys())),
+    default=None,
+    help="Also write commands to agent-native directory (claude, copilot, cursor, windsurf).",
+)
+def init(project_type: str, project_name: str | None, integration: str | None) -> None:
     """Scaffold .businesskit/ folder and artifact files in the current directory."""
     root = Path.cwd()
     if project_name is None:
@@ -154,7 +214,7 @@ def init(project_type: str, project_name: str | None) -> None:
 
     # .businesskit/config.md — rendered with project metadata
     config_path = bk_dir / "config.md"
-    _track(config_path, _write_if_new(config_path, _render_config(project_type, project_name)))
+    _track(config_path, _write_if_new(config_path, _render_config(project_type, project_name, integration or "none")))
 
     # .businesskit/constitution.md and glossary.md
     for name in ("constitution.md", "glossary.md"):
@@ -191,11 +251,20 @@ def init(project_type: str, project_name: str | None) -> None:
             gitkeep.touch()
             created.append("execute/.gitkeep")
 
+    # Agent-native integration — mirror command files to agent dir
+    integration_created: list[str] = []
+    if integration:
+        integration_created = _write_commands_for_integration(commands_dir, root, integration)
+        created.extend(integration_created)
+
     # ── Output ──────────────────────────────────────────────────────────────
     click.echo()
     click.secho("  business-kit initialized", fg="green", bold=True)
     click.echo(f"  Project : {project_name}")
     click.echo(f"  Type    : {project_type}")
+    if integration:
+        cfg = INTEGRATIONS[integration]
+        click.echo(f"  Agent   : {integration}  →  {cfg['dir']}/")
 
     if created:
         click.echo()
@@ -213,7 +282,13 @@ def init(project_type: str, project_name: str | None) -> None:
     click.secho("  Next steps:", bold=True)
     click.echo("    1. Edit  .businesskit/constitution.md  — set tone, brand, non-negotiables")
     click.echo("    2. Open  brief.md  in your editor")
-    click.echo("    3. In your AI assistant, run:  /bk.brief")
+    if integration == "copilot":
+        click.echo("    3. In GitHub Copilot Chat, open .github/prompts/bk.brief.prompt.md")
+        click.echo("       or use: /bk.brief")
+    elif integration:
+        click.echo("    3. In your AI assistant, run:  /bk.brief")
+    else:
+        click.echo("    3. In your AI assistant, load .businesskit/commands/ and run:  /bk.brief")
     click.echo()
 
 
@@ -273,6 +348,27 @@ def module_add(name: str) -> None:
     # Update active_modules in config.md
     _set_active_modules(config_path, active + [name])
 
+    # If an integration is configured, write module commands to agent-native dir
+    module_commands_src = dst  # .businesskit/modules/<name>/
+    stored_integration = _get_integration(config_path)
+    integration_written: list[str] = []
+    if stored_integration:
+        cfg = INTEGRATIONS[stored_integration]
+        target_dir = root / cfg["dir"]
+        target_dir.mkdir(parents=True, exist_ok=True)
+        suffix = cfg["suffix"]
+        for src in sorted(module_commands_src.iterdir()):
+            if src.name != "MODULE.md":
+                continue
+            stem = f"bk.{name}"
+            dst_cmd = target_dir / f"{stem}{suffix}"
+            content = src.read_text("utf-8")
+            if stored_integration == "copilot":
+                desc = f"business-kit {name} module instructions"
+                content = f"---\nmode: 'agent'\ndescription: '{desc}'\n---\n\n{content}"
+            if _write_if_new(dst_cmd, content):
+                integration_written.append(str(dst_cmd.relative_to(root)))
+
     click.echo()
     click.secho(f"  Module '{name}' installed", fg="green", bold=True)
     click.echo(f"  Location: .businesskit/modules/{name}/")
@@ -282,6 +378,11 @@ def module_add(name: str) -> None:
         click.secho("  New commands:", fg="cyan")
         for cmd in commands:
             click.echo(f"    {cmd}")
+    if integration_written:
+        click.echo()
+        click.secho(f"  Also written to {INTEGRATIONS[stored_integration]['dir']}/:", fg="cyan")
+        for f in integration_written:
+            click.echo(f"    + {f}")
     click.echo()
 
 
