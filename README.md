@@ -3,7 +3,7 @@
 
 # business-kit
 
-**Spec-driven methodology for business development.**
+**Turn a business idea into a brief, strategy, and execution assets — in one session with your AI assistant.**
 
 [![Version](https://img.shields.io/badge/version-0.1.0-blue?style=flat-square)](https://github.com/maleksandrov/business-spec-kit/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE)
@@ -14,14 +14,17 @@
 
 ---
 
-business-kit brings the discipline of Spec-Driven Development to business operations. Instead of dumping a vague prompt and hoping, it forces you to define *intent*, *context*, and *success criteria* before an AI generates a single word of strategy, plan, or pitch.
+business-kit is a structured workflow for using AI to produce business documents that are actually ready to use. Instead of dumping a vague prompt and hoping, it guides you through *what you want*, *who it's for*, and *what success looks like* — before the AI writes a single word.
 
-Every phase is gated. Every output is a versioned Markdown file. You review and approve each artifact before the next phase begins.
+Every output is a Markdown file you own. You review and approve each document before the next one begins.
+
+**Good fit for:** founders writing pitch narratives · BD leads drafting partner proposals · strategy teams building annual plans · operators writing investment cases · anyone who's sent an AI-generated document and immediately regretted it
 
 ---
 
 ## Table of Contents
 
+- [🗂️ What You Produce](#%EF%B8%8F-what-you-produce)
 - [⚡ Get Started](#-get-started)
 - [🤖 AI Agent Integration](#-ai-agent-integration)
 - [⚙️ How It Works](#%EF%B8%8F-how-it-works)
@@ -33,6 +36,23 @@ Every phase is gated. Every output is a versioned Markdown file. You review and 
 - [🎯 Design Principles](#-design-principles)
 - [🚫 Out of Scope](#-out-of-scope-v1)
 - [📄 License](#-license)
+
+---
+
+## 🗂️ What You Produce
+
+One project folder. Four phases. Everything in plain Markdown files you can paste, share, or edit anywhere.
+
+| Phase | File | What's inside |
+|-------|------|---------------|
+| **1. Brief** | `brief.md` | Situation, audience, objective, constraints, success criteria |
+| **2. Strategy** | `strategy.md` | 2–3 strategic options, recommended path, rationale, open risks |
+| **3. Plan** | `plan.md` | Sequenced milestones, owners, dependencies, decision points |
+| **4. Execute** | `execute/*.md` | Pitch narrative · proposal · email sequence · deck outline · objection map · GTM motion |
+
+Each phase requires your explicit approval before the next one starts. The AI never skips ahead.
+
+> **Example:** A Series A pitch project produces `brief.md` (the story and the ask), `strategy.md` (narrative options and recommended angle), `plan.md` (prep timeline and rehearsal schedule), and `execute/pitch.md` + `execute/deck.md` + `execute/objections.md`.
 
 ---
 
@@ -274,15 +294,15 @@ bk module remove [name] # deactivate (files kept)
 
 | Module | What it adds | New commands |
 |--------|-------------|-------------|
-| `scrum` | Sprint planning, backlog, velocity tracking | `/bk.sprint` |
-| `itil` | Service level definitions and escalation paths | `/bk.sla` |
-| `safe` | SAFe PI planning with value streams and ROAM risk log | `/bk.pi` |
-| `okr` | Convert brief metrics into Objectives and Key Results | `/bk.okr` |
-| `rfp-issue` | Write RFPs and vendor evaluation scorecards (buyer) | `/bk.rfp`, `/bk.scorecard`, `/bk.vendor-questions` |
-| `rfp-respond` | Write proposal responses to incoming RFPs (vendor) | `/bk.rfp-response`, `/bk.compliance-matrix` |
-| `business-case` | Investment justification with financial model | `/bk.case`, `/bk.model`, `/bk.stakeholders` |
-| `governance` | Decision log and compliance checklist | `/bk.log`, `/bk.compliance` |
-| `retrospective` | Structured lessons-learned after any initiative | `/bk.retro` |
+| `scrum` | Run iterative delivery cycles: turn your plan into sprints, track progress, surface blockers | `/bk.sprint` |
+| `itil` | Define service levels, escalation paths, and SLA commitments for ongoing operations | `/bk.sla` |
+| `safe` | Scale initiatives across multiple teams: programme increments, value streams, risk tracking | `/bk.pi` |
+| `okr` | Convert your strategy metrics into Objectives and Key Results with quarterly check-in templates | `/bk.okr` |
+| `rfp-issue` | Write an RFP and score vendor responses with structured evaluation criteria — when you're the buyer | `/bk.rfp`, `/bk.scorecard`, `/bk.vendor-questions` |
+| `rfp-respond` | Write a winning proposal response to a client RFP, with a compliance matrix — when you're the vendor | `/bk.rfp-response`, `/bk.compliance-matrix` |
+| `business-case` | Build an approval-ready investment justification: exec summary, three options, financial model, stakeholder map | `/bk.case`, `/bk.model`, `/bk.stakeholders` |
+| `governance` | Track decisions and compliance obligations throughout the project — nothing falls through the cracks | `/bk.log`, `/bk.compliance` |
+| `retrospective` | Run a structured lessons-learned review after any initiative, deal, or launch | `/bk.retro` |
 
 ### Worked example: business case approval
 
@@ -386,20 +406,22 @@ Pre-creates: `brief.md` (with business context, time horizon, decision criteria 
 | Principle | Description |
 |-----------|-------------|
 | Intent-first | Define the *why* and *what* before any execution begins |
-| Phase-gated | Human reviews and approves each artifact before proceeding |
-| AI-agnostic | Works with any agent that reads Markdown |
-| Artifact-driven | Every output is a versioned `.md` file, not a chat transcript |
+| Human-in-the-loop | You review and approve each document before the next phase starts |
+| Works with any AI | Claude, ChatGPT, Copilot, Cursor, Gemini — any assistant that can read files |
+| Everything is a file | Every output is a plain `.md` file you own, can edit, and can share |
 | Scale-neutral | Useful for a solo founder and a BD team of 50 equally |
-| Offline-first | No network dependency for the core workflow |
+| No accounts or subscriptions | No network dependency — runs entirely on your machine |
 
 ---
 
-## 🚫 Out of Scope (v1)
+## 🚫 What's intentionally not here
 
-- Web interface
-- SaaS integrations (CRM, Slack, Notion)
-- Multi-user collaboration
-- Automated AI pipeline execution (human-in-the-loop is intentional)
+business-kit keeps you in control at every step. Some things are absent by design:
+
+- **No web interface** — your files live on your machine, not in someone else's SaaS account
+- **No CRM / Slack / Notion sync** — copy-paste is intentional; the files work everywhere already
+- **No multi-user real-time editing** — one owner reviews and approves each phase
+- **No auto-run pipelines** — the AI never moves to the next phase without your explicit sign-off
 
 ---
 
