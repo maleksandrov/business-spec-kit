@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="business-kit logo">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="120" height="120" rx="22" fill="url(#bg-grad)"/>
+
+  <!-- Document body -->
+  <rect x="18" y="14" width="72" height="88" rx="8" fill="#0f172a" opacity="0.5"/>
+  <rect x="18" y="14" width="72" height="88" rx="8" fill="none" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- Dog-ear top-right corner -->
+  <path d="M 74 14 L 90 30 L 74 30 Z" fill="#334155"/>
+  <path d="M 74 14 L 90 14 L 90 30 Z" fill="#0f172a"/>
+
+  <!-- Content lines representing the brief -->
+  <rect x="26" y="24" width="38" height="3" rx="1.5" fill="#60a5fa" opacity="0.85"/>
+  <rect x="26" y="31" width="28" height="2.5" rx="1.25" fill="#475569"/>
+  <rect x="26" y="37" width="34" height="2.5" rx="1.25" fill="#475569"/>
+  <rect x="26" y="43" width="22" height="2.5" rx="1.25" fill="#475569"/>
+
+  <!-- Separator -->
+  <line x1="26" y1="52" x2="82" y2="52" stroke="#334155" stroke-width="1"/>
+
+  <!-- Phase bars ascending left to right -->
+  <!-- Brief — blue -->
+  <rect x="26" y="78" width="14" height="14" rx="3" fill="#3b82f6"/>
+  <!-- Strategy — indigo -->
+  <rect x="44" y="66" width="14" height="26" rx="3" fill="#818cf8"/>
+  <!-- Execute — emerald -->
+  <rect x="62" y="56" width="14" height="36" rx="3" fill="#34d399"/>
+
+  <!-- Trend line connecting bar tops -->
+  <polyline
+    points="33,78 51,66 69,56"
+    fill="none"
+    stroke="rgba(255,255,255,0.18)"
+    stroke-width="1.5"
+    stroke-dasharray="3 2"
+    stroke-linecap="round"
+  />
+
+  <!-- Checkmark badge on the execute bar -->
+  <circle cx="69" cy="64" r="7.5" fill="#059669"/>
+  <polyline
+    points="65.2,64 68,67.2 73.8,60.8"
+    fill="none"
+    stroke="white"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>

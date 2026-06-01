@@ -1,6 +1,18 @@
+<div align="center">
+<img src="media/logo.svg" alt="business-kit" width="96" height="96">
+
 # business-kit
 
-> Spec-driven methodology for business development.
+**Spec-driven methodology for business development.**
+
+[![Version](https://img.shields.io/badge/version-0.1.0-blue?style=flat-square)](https://github.com/maleksandrov/business-spec-kit/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-22c55e?style=flat-square)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![AI Agents](https://img.shields.io/badge/agents-Claude%20·%20Copilot%20·%20Cursor%20·%20Windsurf-7c3aed?style=flat-square)](README.md#-ai-agent-integration)
+
+</div>
+
+---
 
 business-kit brings the discipline of Spec-Driven Development to business operations. Instead of dumping a vague prompt and hoping, it forces you to define *intent*, *context*, and *success criteria* before an AI generates a single word of strategy, plan, or pitch.
 
@@ -8,19 +20,43 @@ Every phase is gated. Every output is a versioned Markdown file. You review and 
 
 ---
 
-## Quickstart
+## Table of Contents
+
+- [⚡ Get Started](#-get-started)
+- [🤖 AI Agent Integration](#-ai-agent-integration)
+- [⚙️ How It Works](#%EF%B8%8F-how-it-works)
+- [🚦 Phase Gates](#-phase-gates)
+- [🔧 Command Reference](#-command-reference)
+- [📁 Folder Structure](#-folder-structure)
+- [🧩 Modules](#-modules)
+- [📐 Preset Examples](#-preset-examples)
+- [🎯 Design Principles](#-design-principles)
+- [🚫 Out of Scope](#-out-of-scope-v1)
+- [📄 License](#-license)
+
+---
+
+## ⚡ Get Started
 
 ### 1. Install
 
+**Recommended — with [`uv`](https://docs.astral.sh/uv/) (no virtualenv needed):**
+
 ```bash
-pip install business-kit
+uv tool install business-kit --from git+https://github.com/maleksandrov/business-spec-kit.git
 ```
 
-Or from source:
+**Or with pip:**
 
 ```bash
-git clone https://github.com/your-org/business-kit
-cd business-kit
+pip install git+https://github.com/maleksandrov/business-spec-kit.git
+```
+
+**Or from source:**
+
+```bash
+git clone https://github.com/maleksandrov/business-spec-kit.git
+cd business-spec-kit
 pip install -e .
 ```
 
@@ -41,24 +77,28 @@ bk init --type pitch        # Investor or client pitch
 bk init --type strategy     # Strategic planning
 ```
 
-You can also name the project:
+For native AI agent integration — slash commands written directly into your agent's directory:
 
 ```bash
-bk init --type pitch --name "series-a-2026"
+bk init --integration claude    # Claude Code  →  .claude/commands/
+bk init --integration copilot   # GitHub Copilot  →  .github/prompts/
+bk init --integration cursor    # Cursor  →  .cursor/rules/
+bk init --integration windsurf  # Windsurf  →  .windsurf/rules/
+```
+
+You can combine flags:
+
+```bash
+bk init --type pitch --name "series-a-2026" --integration copilot
 ```
 
 ### 3. Set your constitution
 
-Open `.businesskit/constitution.md` and fill in:
-- Your tone and brand voice
-- Non-negotiables (things that must always or never appear in outputs)
-- Who you are and who you're not
-
-This file is read on every AI invocation. Five minutes here prevents hours of off-brand rewrites.
+Open `.businesskit/constitution.md` and fill in your tone, brand voice, and non-negotiables. This file is included in every AI invocation. Five minutes here prevents hours of off-brand rewrites.
 
 ### 4. Start your brief
 
-In your AI assistant (Claude, GPT, Gemini), with the project folder open:
+In your AI assistant, with the project folder open:
 
 ```
 /bk.brief
@@ -69,19 +109,44 @@ The agent guides you through the brief one question at a time. When complete, it
 ### 5. Generate strategy, plan, and execution assets
 
 ```
-/bk.strategy    # After brief.md is complete
-/bk.plan        # After strategy.md is approved
-/bk.execute pitch       # Or any of: proposal, email, deck, gtm, partner, objections
+/bk.strategy             # After brief.md is complete
+/bk.plan                 # After strategy.md is approved
+/bk.execute pitch        # Or: proposal, email, deck, gtm, partner, objections
 ```
 
 ---
 
-## How It Works
+## 🤖 AI Agent Integration
+
+The `--integration` flag wires slash commands directly into your AI agent's native directory so they appear automatically without any manual file loading.
+
+```bash
+bk init --integration claude     # Claude Code
+bk init --integration copilot    # GitHub Copilot
+bk init --integration cursor     # Cursor
+bk init --integration windsurf   # Windsurf
+```
+
+| Integration | Command files written to | File format |
+|-------------|--------------------------|-------------|
+| `claude` | `.claude/commands/` | `.md` — available as `/bk.*` slash commands |
+| `copilot` | `.github/prompts/` | `.prompt.md` — with `mode: 'agent'` frontmatter |
+| `cursor` | `.cursor/rules/` | `.md` — auto-attached as context rules |
+| `windsurf` | `.windsurf/rules/` | `.md` — auto-attached as context rules |
+| *(none)* | `.businesskit/commands/` | `.md` — load manually when invoking |
+
+`.businesskit/commands/` is **always written** as the universal fallback regardless of integration choice.
+
+The chosen integration is stored in `.businesskit/config.md`. When you later run `bk module add [name]`, the module's instruction file is automatically written to the same agent directory — no extra flags needed.
+
+---
+
+## ⚙️ How It Works
 
 business-kit is entirely file-based and AI-agnostic. The CLI scaffolds a folder with:
 
 - **Markdown templates** — artifact files with structured placeholder syntax
-- **Command instruction files** — `.md` files in `.businesskit/commands/` that tell your AI agent exactly what to do for each slash command
+- **Command instruction files** — `.md` files that tell your AI agent exactly what to do for each slash command
 - **A constitution** — a persistent context file that keeps outputs on-brand
 
 ```
@@ -92,7 +157,7 @@ Your AI agent reads the instruction files. You review and approve each artifact 
 
 ---
 
-## Phase Gates
+## 🚦 Phase Gates
 
 | Phase | Command | Output | Gate to unlock next phase |
 |-------|---------|--------|--------------------------|
@@ -102,6 +167,7 @@ Your AI agent reads the instruction files. You review and approve each artifact 
 | 4. Execute | `/bk.execute [type]` | `execute/` folder | Review before use |
 
 **Phase gate rules enforced by the AI:**
+
 1. `/bk.strategy` will not run if `brief.md` is incomplete or contains unfilled sections
 2. `/bk.plan` will not run unless `strategy.md` has `Status: Approved`
 3. `/bk.execute` will not run unless `plan.md` exists
@@ -110,21 +176,22 @@ Your AI agent reads the instruction files. You review and approve each artifact 
 
 ---
 
-## Command Reference
+## 🔧 Command Reference
 
-### CLI commands (run in your terminal)
+### CLI commands
 
 | Command | Description |
 |---------|-------------|
 | `bk init` | Scaffold `.businesskit/` folder and artifact files |
-| `bk init --type [gtm\|partnership\|pitch\|strategy]` | Scaffold with preset templates |
+| `bk init --type [gtm\|partnership\|pitch\|strategy]` | Scaffold with a preset |
 | `bk init --name [name]` | Set project name (default: directory name) |
+| `bk init --integration [claude\|copilot\|cursor\|windsurf]` | Write commands to agent-native directory |
 | `bk module list` | List all available modules and their status |
 | `bk module add [name]` | Install a module into `.businesskit/modules/` |
 | `bk module remove [name]` | Deactivate a module (files are kept) |
 | `bk --version` | Show version |
 
-### Slash commands (run in your AI assistant)
+### Slash commands
 
 | Command | Description |
 |---------|-------------|
@@ -145,17 +212,17 @@ Your AI agent reads the instruction files. You review and approve each artifact 
 
 ---
 
-## Folder Structure
+## 📁 Folder Structure
 
 After `bk init`:
 
 ```
 project-root/
 ├── .businesskit/
-│   ├── config.md          # Project name, type, AI agent preference
+│   ├── config.md          # Project name, type, integration, active modules
 │   ├── constitution.md    # Tone, brand voice, non-negotiables — edit this first
 │   ├── glossary.md        # Domain terms the AI must use correctly
-│   └── commands/          # AI instruction files (one per slash command)
+│   └── commands/          # Universal fallback — one .md per slash command
 │       ├── bk.brief.md
 │       ├── bk.strategy.md
 │       ├── bk.plan.md
@@ -167,25 +234,35 @@ project-root/
 ├── strategy.md            # Phase 2: the strategy
 ├── plan.md                # Phase 3: the execution plan
 └── execute/               # Phase 4: execution assets
-    ├── pitch.md
-    ├── proposal.md
-    └── ...
+```
+
+With `--integration claude` (same structure for other agents):
+
+```
+project-root/
+├── .claude/
+│   └── commands/          # Native Claude slash commands (mirrors .businesskit/commands/)
+│       ├── bk.brief.md
+│       ├── bk.strategy.md
+│       └── ...
+└── .businesskit/          # Universal fallback (always present)
 ```
 
 After `bk module add [name]`:
 
 ```
 project-root/
-└── .businesskit/
-    └── modules/
-        └── [name]/           # Module templates and instruction files
-            ├── MODULE.md     # AI agent instructions for this module
-            └── *.template.md # Artifact templates added by the module
+├── .businesskit/
+│   └── modules/[name]/
+│       ├── MODULE.md      # AI instruction file for this module
+│       └── *.template.md  # Artifact templates
+└── .claude/commands/
+    └── bk.[name].md       # Also written to agent dir automatically
 ```
 
 ---
 
-## Modules
+## 🧩 Modules
 
 Modules extend business-kit with optional frameworks. Install only what you need.
 
@@ -221,101 +298,73 @@ Installs `business-case`, `financial-model`, and `stakeholder-map` templates int
 Then in your AI assistant:
 
 ```
-/bk.brief
+/bk.brief         # Complete the brief as normal
+/bk.case          # Generates execute/business-case.md
+/bk.model         # Generates execute/financial-model.md (3-year pessimistic/realistic/optimistic)
+/bk.stakeholders  # Generates execute/stakeholder-map.md with approval sequence
 ```
 
-The agent guides you through the brief as normal. Once `brief.md` is complete:
-
-```
-/bk.case
-```
-
-The agent asks four mandatory questions before generating anything:
-
-1. Who is the primary decision-maker?
-2. What is the approval deadline?
-3. What is the budget range?
-4. Does a financial model already exist?
-
-Then it writes `execute/business-case.md` with an executive summary, problem statement, three options (including "Do Nothing"), financial summary, risk log, and a single unambiguous ask.
-
-```
-/bk.model
-```
-
-Generates `execute/financial-model.md` with pessimistic, realistic, and optimistic 3-year scenarios and a sensitivity analysis.
-
-```
-/bk.stakeholders
-```
-
-Generates `execute/stakeholder-map.md` with decision-makers, influencers, blockers, and a communication plan with the recommended approval sequence.
+The `/bk.case` command asks four mandatory questions before generating anything: primary decision-maker, approval deadline, budget range, and whether a financial model already exists. It never skips these.
 
 ---
 
-## Preset Examples
+## 📐 Preset Examples
 
 ### GTM Launch (`--type gtm`)
 
-For launching a new product, entering a new market, or targeting a new segment.
-
 ```bash
-bk init --type gtm --name "acme-launch-q3"
+bk init --type gtm --name "acme-launch-q3" --integration copilot
 ```
 
 Pre-creates: `brief.md` (with ICP, positioning, channels, launch timeline prompts), `execute/gtm.md`, `execute/email.md`, `execute/pitch.md`
 
-**Typical workflow:**
-1. `/bk.brief` — define ICP, positioning, and channels
-2. `/bk.strategy` — define GTM approach and sequencing logic
-3. `/bk.plan` — sequence launch activities week by week
-4. `/bk.execute email` — outreach sequences for each channel
-5. `/bk.execute gtm` — full launch motion with content plan
+```
+/bk.brief             # Define ICP, positioning, and channels
+/bk.strategy          # Define GTM approach and sequencing logic
+/bk.plan              # Sequence launch activities week by week
+/bk.execute email     # Outreach sequences for each channel
+/bk.execute gtm       # Full launch motion with content plan
+```
 
 ---
 
 ### Partnership (`--type partnership`)
 
-For pursuing a BD relationship, co-sell agreement, or technology integration.
-
 ```bash
-bk init --type partnership --name "acme-stripe-partnership"
+bk init --type partnership --name "acme-stripe-partnership" --integration claude
 ```
 
 Pre-creates: `brief.md` (with partner profile, value exchange, integration depth prompts), `execute/partner-brief.md`, `execute/proposal.md`, `execute/email.md`
 
-**Typical workflow:**
-1. `/bk.brief` — define the partner, value exchange, and goals
-2. `/bk.strategy` — define partnership approach and prioritisation logic
-3. `/bk.plan` — sequence outreach, negotiation, and close
-4. `/bk.execute email` — first outreach sequence
-5. `/bk.execute partner` — partnership brief to send to the prospect
+```
+/bk.brief             # Define the partner, value exchange, and goals
+/bk.strategy          # Define partnership approach and prioritisation logic
+/bk.plan              # Sequence outreach, negotiation, and close
+/bk.execute email     # First outreach sequence
+/bk.execute partner   # Partnership brief to send to the prospect
+```
 
 ---
 
 ### Pitch (`--type pitch`)
 
-For investor meetings, client pitches, or competitive RFP responses.
-
 ```bash
-bk init --type pitch --name "series-a-2026"
+bk init --type pitch --name "series-a-2026" --integration cursor
 ```
 
 Pre-creates: `brief.md` (with investor/client type, ask, proof points, objections prompts), `execute/pitch.md`, `execute/deck-outline.md`, `execute/objections.md`
 
-**Typical workflow:**
-1. `/bk.brief` — define the audience, the ask, and your proof points
-2. `/bk.strategy` — define narrative strategy and positioning
-3. `/bk.plan` — sequence pitch prep, rehearsal, and follow-up
-4. `/bk.execute pitch` — full pitch narrative
-5. `/bk.execute deck` — slide-by-slide structure with speaker notes
-6. `/bk.execute objections` — objection map for every anticipated pushback
+```
+/bk.brief                  # Define audience, the ask, and proof points
+/bk.strategy               # Define narrative strategy and positioning
+/bk.execute pitch          # Full pitch narrative
+/bk.execute deck           # Slide-by-slide structure with speaker notes
+/bk.execute objections     # Objection map for every anticipated pushback
+```
 
 ---
 
 ### Strategy (`--type strategy`)
-
-For annual planning, competitive response, or major directional decisions.
 
 ```bash
 bk init --type strategy --name "2026-annual-strategy"
@@ -323,29 +372,16 @@ bk init --type strategy --name "2026-annual-strategy"
 
 Pre-creates: `brief.md` (with business context, time horizon, decision criteria prompts), `execute/gtm.md`, `execute/objections.md`
 
-**Typical workflow:**
-1. `/bk.brief` — define the strategic question, context, and constraints
-2. `/bk.strategy` — develop options with rationale and recommendation
-3. `/bk.plan` — sequence strategic initiatives and decision points
-4. `/bk.execute gtm` — go-to-market implications of the chosen strategy
+```
+/bk.brief           # Define the strategic question, context, and constraints
+/bk.strategy        # Develop options with rationale and recommendation
+/bk.plan            # Sequence strategic initiatives and decision points
+/bk.execute gtm     # Go-to-market implications of the chosen strategy
+```
 
 ---
 
-## Using with AI Assistants
-
-business-kit works with any AI that can read files in your project directory.
-
-**Claude (claude.ai or Claude desktop app):** Add the project to your context. The slash commands work as natural language instructions that reference the files in `.businesskit/commands/`.
-
-**ChatGPT / Cursor / GitHub Copilot:** Reference or upload the relevant files. The command instruction files work as system prompt additions.
-
-**Gemini and others:** Same approach — include `.businesskit/commands/bk.[command].md` in your context when invoking each slash command.
-
-**Tip:** Always include `.businesskit/constitution.md` in your AI context. It is the single most important file for keeping outputs on-brand. Without it, outputs will be generically correct but brand-wrong.
-
----
-
-## Design Principles
+## 🎯 Design Principles
 
 | Principle | Description |
 |-----------|-------------|
@@ -358,7 +394,7 @@ business-kit works with any AI that can read files in your project directory.
 
 ---
 
-## Out of Scope (v1)
+## 🚫 Out of Scope (v1)
 
 - Web interface
 - SaaS integrations (CRM, Slack, Notion)
@@ -367,6 +403,12 @@ business-kit works with any AI that can read files in your project directory.
 
 ---
 
-## License
+## 💬 Support
 
-MIT
+Open a [GitHub issue](https://github.com/maleksandrov/business-spec-kit/issues/new) for bug reports, feature requests, or questions.
+
+---
+
+## 📄 License
+
+MIT — see [LICENSE](LICENSE) for details.
